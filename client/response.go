@@ -8,7 +8,7 @@ import (
 )
 
 // Response type wraps http.Response
-// Contains parsed response data and Geziyor functions.
+// Contains parsed response data and Gop functions.
 type Response struct {
 	*http.Response
 

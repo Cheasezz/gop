@@ -1,19 +1,19 @@
-package geziyor
+package gop
 
 import (
 	"net/http"
 	"net/url"
 	"time"
 
-	"github.com/chromedp/chromedp"
 	"github.com/Cheasezz/gop/cache"
 	"github.com/Cheasezz/gop/client"
 	"github.com/Cheasezz/gop/export"
 	"github.com/Cheasezz/gop/metrics"
 	"github.com/Cheasezz/gop/middleware"
+	"github.com/chromedp/chromedp"
 )
 
-// Options is custom options type for Geziyor
+// Options is custom options type for Gop
 type Options struct {
 	// AllowedDomains is domains that are allowed to make requests
 	// If empty, any domain is allowed
@@ -50,7 +50,7 @@ type Options struct {
 
 	// ErrorFunc is callback of errors.
 	// If not defined, all errors will be logged.
-	ErrorFunc func(g *Geziyor, r *client.Request, err error)
+	ErrorFunc func(g *Gop, r *client.Request, err error)
 
 	// For extracting data
 	Exporters []export.Exporter
@@ -68,7 +68,7 @@ type Options struct {
 	MetricsType metrics.Type
 
 	// ParseFunc is callback of StartURLs response.
-	ParseFunc func(g *Geziyor, r *client.Response)
+	ParseFunc func(g *Gop, r *client.Response)
 
 	// If true, HTML parsing is disabled to improve performance.
 	ParseHTMLDisabled bool
@@ -110,7 +110,7 @@ type Options struct {
 	RobotsTxtDisabled bool
 
 	// StartRequestsFunc called on scraper start
-	StartRequestsFunc func(g *Geziyor)
+	StartRequestsFunc func(g *Gop)
 
 	// First requests will made to this url array. (Concurrently)
 	StartURLs []string
@@ -122,6 +122,6 @@ type Options struct {
 	URLRevisitEnabled bool
 
 	// User Agent.
-	// Default: "Geziyor 1.0"
+	// Default: "Gop 1.0"
 	UserAgent string
 }

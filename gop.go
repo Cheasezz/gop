@@ -1,13 +1,13 @@
-package geziyor
+package gop
 
 import (
-	"github.com/chromedp/chromedp"
 	"github.com/Cheasezz/gop/cache"
 	"github.com/Cheasezz/gop/client"
 	"github.com/Cheasezz/gop/export"
 	"github.com/Cheasezz/gop/internal"
 	"github.com/Cheasezz/gop/metrics"
 	"github.com/Cheasezz/gop/middleware"
+	"github.com/chromedp/chromedp"
 	"golang.org/x/time/rate"
 
 	"io"
@@ -19,8 +19,8 @@ import (
 	"sync"
 )
 
-// Geziyor is our main scraper type
-type Geziyor struct {
+// Gop is our main scraper type
+type Gop struct {
 	Opt     *Options
 	Client  *client.Client
 	Exports chan interface{}
@@ -39,9 +39,9 @@ type Geziyor struct {
 	shutdown bool
 }
 
-// NewGeziyor creates new Geziyor with default values.
+// NewGop creates new Gop with default values.
 // If options provided, options
-func NewGeziyor(opt *Options) *Geziyor {
+func NewGop(opt *Options) *Gop {
 
 	// Default Options
 	if opt.UserAgent == "" {
@@ -57,7 +57,7 @@ func NewGeziyor(opt *Options) *Geziyor {
 		opt.RetryHTTPCodes = client.DefaultRetryHTTPCodes
 	}
 
-	geziyor := &Geziyor{
+	gop := &Gop{
 		Opt:     opt,
 		Exports: make(chan interface{}, 1),
 		reqMiddlewares: []middleware.RequestProcessor{
@@ -74,7 +74,7 @@ func NewGeziyor(opt *Options) *Geziyor {
 	}
 
 	// Client
-	geziyor.Client = client.NewClient(&client.Options{
+	gop.Client = client.NewClient(&client.Options{
 		MaxBodySize:           opt.MaxBodySize,
 		CharsetDetectDisabled: opt.CharsetDetectDisabled,
 		RetryTimes:            opt.RetryTimes,
@@ -85,48 +85,48 @@ func NewGeziyor(opt *Options) *Geziyor {
 		PreActionsF:           opt.PreActionsF,
 	})
 	if opt.Cache != nil {
-		geziyor.Client.Transport = &cache.Transport{
+		gop.Client.Transport = &cache.Transport{
 			Policy:              opt.CachePolicy,
-			Transport:           geziyor.Client.Transport,
+			Transport:           gop.Client.Transport,
 			Cache:               opt.Cache,
 			MarkCachedResponses: true,
 		}
 	}
 	if opt.Timeout != 0 {
-		geziyor.Client.Timeout = opt.Timeout
+		gop.Client.Timeout = opt.Timeout
 	}
 	if !opt.CookiesDisabled {
-		geziyor.Client.Jar, _ = cookiejar.New(nil)
+		gop.Client.Jar, _ = cookiejar.New(nil)
 	}
 	if opt.MaxRedirect != 0 {
-		geziyor.Client.CheckRedirect = client.NewRedirectionHandler(opt.MaxRedirect)
+		gop.Client.CheckRedirect = client.NewRedirectionHandler(opt.MaxRedirect)
 	}
 
 	// Concurrency
 	if opt.RequestsPerSecond != 0 {
-		geziyor.rateLimiter = rate.NewLimiter(rate.Limit(opt.RequestsPerSecond), int(opt.RequestsPerSecond))
+		gop.rateLimiter = rate.NewLimiter(rate.Limit(opt.RequestsPerSecond), int(opt.RequestsPerSecond))
 	}
 	if opt.ConcurrentRequests != 0 {
-		geziyor.semGlobal = make(chan struct{}, opt.ConcurrentRequests)
+		gop.semGlobal = make(chan struct{}, opt.ConcurrentRequests)
 	}
 	if opt.ConcurrentRequestsPerDomain != 0 {
-		geziyor.semHosts = struct {
+		gop.semHosts = struct {
 			sync.RWMutex
 			hostSems map[string]chan struct{}
 		}{hostSems: make(map[string]chan struct{})}
 	}
 
 	// Base Middlewares
-	metricsMiddleware := &middleware.Metrics{Metrics: geziyor.metrics}
-	geziyor.reqMiddlewares = append(geziyor.reqMiddlewares, metricsMiddleware)
-	geziyor.resMiddlewares = append(geziyor.resMiddlewares, metricsMiddleware)
+	metricsMiddleware := &middleware.Metrics{Metrics: gop.metrics}
+	gop.reqMiddlewares = append(gop.reqMiddlewares, metricsMiddleware)
+	gop.resMiddlewares = append(gop.resMiddlewares, metricsMiddleware)
 
-	robotsMiddleware := middleware.NewRobotsTxt(geziyor.Client, geziyor.metrics, opt.RobotsTxtDisabled)
-	geziyor.reqMiddlewares = append(geziyor.reqMiddlewares, robotsMiddleware)
+	robotsMiddleware := middleware.NewRobotsTxt(gop.Client, gop.metrics, opt.RobotsTxtDisabled)
+	gop.reqMiddlewares = append(gop.reqMiddlewares, robotsMiddleware)
 
 	// Custom Middlewares
-	geziyor.reqMiddlewares = append(geziyor.reqMiddlewares, opt.RequestMiddlewares...)
-	geziyor.resMiddlewares = append(geziyor.resMiddlewares, opt.ResponseMiddlewares...)
+	gop.reqMiddlewares = append(gop.reqMiddlewares, opt.RequestMiddlewares...)
+	gop.resMiddlewares = append(gop.resMiddlewares, opt.ResponseMiddlewares...)
 
 	// Logging
 	if opt.LogDisabled {
@@ -135,11 +135,11 @@ func NewGeziyor(opt *Options) *Geziyor {
 		internal.Logger.SetOutput(os.Stdout)
 	}
 
-	return geziyor
+	return gop
 }
 
 // Start starts scraping
-func (g *Geziyor) Start() {
+func (g *Gop) Start() {
 	internal.Logger.Println("Scraping Started")
 
 	// Metrics
@@ -174,7 +174,7 @@ func (g *Geziyor) Start() {
 }
 
 // Get issues a GET to the specified URL.
-func (g *Geziyor) Get(url string, callback func(g *Geziyor, r *client.Response)) {
+func (g *Gop) Get(url string, callback func(g *Gop, r *client.Response)) {
 	req, err := client.NewRequest("GET", url, nil)
 	if err != nil {
 		internal.Logger.Printf("Request creating error %v\n", err)
@@ -186,7 +186,7 @@ func (g *Geziyor) Get(url string, callback func(g *Geziyor, r *client.Response))
 // GetRendered issues GET request using headless browser
 // Opens up a new Chrome instance, makes request, waits for rendering HTML DOM and closed.
 // Rendered requests only supported for GET requests.
-func (g *Geziyor) GetRendered(url string, callback func(g *Geziyor, r *client.Response)) {
+func (g *Gop) GetRendered(url string, callback func(g *Gop, r *client.Response)) {
 	req, err := client.NewRequest("GET", url, nil)
 	if err != nil {
 		internal.Logger.Printf("Request creating error %v\n", err)
@@ -197,7 +197,7 @@ func (g *Geziyor) GetRendered(url string, callback func(g *Geziyor, r *client.Re
 }
 
 // Head issues a HEAD to the specified URL
-func (g *Geziyor) Head(url string, callback func(g *Geziyor, r *client.Response)) {
+func (g *Gop) Head(url string, callback func(g *Gop, r *client.Response)) {
 	req, err := client.NewRequest("HEAD", url, nil)
 	if err != nil {
 		internal.Logger.Printf("Request creating error %v\n", err)
@@ -207,7 +207,7 @@ func (g *Geziyor) Head(url string, callback func(g *Geziyor, r *client.Response)
 }
 
 // Post issues a POST to the specified URL
-func (g *Geziyor) Post(url string, body io.Reader, callback func(g *Geziyor, r *client.Response)) {
+func (g *Gop) Post(url string, body io.Reader, callback func(g *Gop, r *client.Response)) {
 	req, err := client.NewRequest("POST", url, body)
 	if err != nil {
 		internal.Logger.Printf("Request creating error %v\n", err)
@@ -217,7 +217,7 @@ func (g *Geziyor) Post(url string, body io.Reader, callback func(g *Geziyor, r *
 }
 
 // Do sends an HTTP request
-func (g *Geziyor) Do(req *client.Request, callback func(g *Geziyor, r *client.Response)) {
+func (g *Gop) Do(req *client.Request, callback func(g *Gop, r *client.Response)) {
 	if g.shutdown {
 		return
 	}
@@ -230,7 +230,7 @@ func (g *Geziyor) Do(req *client.Request, callback func(g *Geziyor, r *client.Re
 }
 
 // Do sends an HTTP request
-func (g *Geziyor) do(req *client.Request, callback func(g *Geziyor, r *client.Response)) {
+func (g *Gop) do(req *client.Request, callback func(g *Gop, r *client.Response)) {
 	g.acquireSem(req)
 	defer g.releaseSem(req)
 	defer g.wgRequests.Done()
@@ -267,7 +267,7 @@ func (g *Geziyor) do(req *client.Request, callback func(g *Geziyor, r *client.Re
 	}
 }
 
-func (g *Geziyor) acquireSem(req *client.Request) {
+func (g *Gop) acquireSem(req *client.Request) {
 	if g.rateLimiter != nil {
 		_ = g.rateLimiter.Wait(req.Context())
 	}
@@ -288,7 +288,7 @@ func (g *Geziyor) acquireSem(req *client.Request) {
 	}
 }
 
-func (g *Geziyor) releaseSem(req *client.Request) {
+func (g *Gop) releaseSem(req *client.Request) {
 	if g.Opt.ConcurrentRequests != 0 {
 		<-g.semGlobal
 	}
@@ -302,7 +302,7 @@ func (g *Geziyor) releaseSem(req *client.Request) {
 
 // recoverMe prevents scraping being crashed.
 // Logs error and stack trace
-func (g *Geziyor) recoverMe() {
+func (g *Gop) recoverMe() {
 	if r := recover(); r != nil {
 		internal.Logger.Println(r, string(debug.Stack()))
 		g.metrics.PanicCounter.Add(1)
@@ -310,7 +310,7 @@ func (g *Geziyor) recoverMe() {
 }
 
 // interruptSignalWaiter waits data from provided channels and stops scraper if shutdownChan channel receives SIGINT
-func (g *Geziyor) interruptSignalWaiter(shutdownChan chan os.Signal, shutdownDoneChan chan struct{}) {
+func (g *Gop) interruptSignalWaiter(shutdownChan chan os.Signal, shutdownDoneChan chan struct{}) {
 	for {
 		select {
 		case <-shutdownChan:
@@ -323,7 +323,7 @@ func (g *Geziyor) interruptSignalWaiter(shutdownChan chan os.Signal, shutdownDon
 	}
 }
 
-func (g *Geziyor) startExporters() {
+func (g *Gop) startExporters() {
 	if len(g.Opt.Exporters) != 0 {
 		var exporterChans []chan interface{}
 

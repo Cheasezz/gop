@@ -10,10 +10,10 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/Cheasezz/gop/internal"
 	"github.com/chromedp/cdproto/dom"
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/chromedp"
-	"github.com/Cheasezz/gop/internal"
 	"golang.org/x/net/html/charset"
 	"golang.org/x/text/transform"
 )
@@ -39,7 +39,7 @@ type Options struct {
 	AllocatorOptions      []chromedp.ExecAllocatorOption
 	ProxyFunc             func(*http.Request) (*url.URL, error)
 	// Changing this will override the existing default PreActions for Rendered requests.
-	// Geziyor Response will be nearly empty. Because we have no way to extract response without default pre actions.
+	// Gop Response will be nearly empty. Because we have no way to extract response without default pre actions.
 	// So, if you set this, you should handle all navigation, header setting, and response handling yourself.
 	// See defaultPreActions variable for the existing defaults.
 	PreActionsF func(data *ResponseData) []chromedp.Action
@@ -47,7 +47,7 @@ type Options struct {
 
 // Default values for client
 const (
-	DefaultUserAgent        = "Geziyor 1.0"
+	DefaultUserAgent        = "Gop 0.1"
 	DefaultMaxBody    int64 = 1024 * 1024 * 1024 // 1GB
 	DefaultRetryTimes       = 2
 )

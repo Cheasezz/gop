@@ -1,13 +1,14 @@
 package metrics
 
 import (
+	"net/http"
+
 	"github.com/go-kit/kit/metrics"
 	"github.com/go-kit/kit/metrics/discard"
 	"github.com/go-kit/kit/metrics/expvar"
 	"github.com/go-kit/kit/metrics/prometheus"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"net/http"
 )
 
 // Type represents metrics Types
@@ -58,32 +59,32 @@ func NewMetrics(metricsType Type) *Metrics {
 	case Prometheus:
 		return &Metrics{
 			RequestCounter: prometheus.NewCounterFrom(stdprometheus.CounterOpts{
-				Namespace: "geziyor",
+				Namespace: "gop",
 				Name:      "request_count",
 				Help:      "Request count",
 			}, []string{"method"}),
 			ResponseCounter: prometheus.NewCounterFrom(stdprometheus.CounterOpts{
-				Namespace: "geziyor",
+				Namespace: "gop",
 				Name:      "response_count",
 				Help:      "Response count",
 			}, []string{"status"}),
 			PanicCounter: prometheus.NewCounterFrom(stdprometheus.CounterOpts{
-				Namespace: "geziyor",
+				Namespace: "gop",
 				Name:      "panic_count",
 				Help:      "Panic count",
 			}, []string{}),
 			RobotsTxtRequestCounter: prometheus.NewCounterFrom(stdprometheus.CounterOpts{
-				Namespace: "geziyor",
+				Namespace: "gop",
 				Name:      "robotstxt_request_count",
 				Help:      "Robotstxt request count",
 			}, []string{}),
 			RobotsTxtResponseCounter: prometheus.NewCounterFrom(stdprometheus.CounterOpts{
-				Namespace: "geziyor",
+				Namespace: "gop",
 				Name:      "robotstxt_response_count",
 				Help:      "Robotstxt response count",
 			}, []string{"status"}),
 			RobotsTxtForbiddenCounter: prometheus.NewCounterFrom(stdprometheus.CounterOpts{
-				Namespace: "geziyor",
+				Namespace: "gop",
 				Name:      "robotstxt_forbidden_count",
 				Help:      "Robotstxt forbidden count",
 			}, []string{"method"}),
