@@ -1,15 +1,16 @@
 package geziyor
 
 import (
-	"github.com/chromedp/chromedp"
-	"github.com/geziyor/geziyor/cache"
-	"github.com/geziyor/geziyor/client"
-	"github.com/geziyor/geziyor/export"
-	"github.com/geziyor/geziyor/metrics"
-	"github.com/geziyor/geziyor/middleware"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/chromedp/chromedp"
+	"github.com/Cheasezz/gop/cache"
+	"github.com/Cheasezz/gop/client"
+	"github.com/Cheasezz/gop/export"
+	"github.com/Cheasezz/gop/metrics"
+	"github.com/Cheasezz/gop/middleware"
 )
 
 // Options is custom options type for Geziyor
@@ -77,8 +78,8 @@ type Options struct {
 
 	// Rendered requests pre actions. Setting this will override the existing default.
 	// And you'll need to handle all rendered actions, like navigation, waiting, response etc.
-	// If you need to make custom actions in addition to the defaults, use Request.Actions instead of this.
-	PreActions []chromedp.Action
+	// If you need to make custom actions in addition to the defaults, use Request.ActionsF instead of this.
+	PreActionsF func(data *client.ResponseData) []chromedp.Action
 
 	// Request delays
 	RequestDelay time.Duration

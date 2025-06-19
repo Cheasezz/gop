@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/geziyor/geziyor/client"
+	"github.com/Cheasezz/gop/client"
 	"math/rand"
 	"time"
 )

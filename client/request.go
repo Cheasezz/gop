@@ -1,9 +1,10 @@
 package client
 
 import (
-	"github.com/chromedp/chromedp"
 	"io"
 	"net/http"
+
+	"github.com/chromedp/chromedp"
 )
 
 // Request is a small wrapper around *http.Request that contains Metadata and Rendering option
@@ -29,7 +30,7 @@ type Request struct {
 	Cancelled bool
 
 	// Chrome actions to be run if the request is Rendered
-	Actions []chromedp.Action
+	ActionsF func(data *ResponseData) []chromedp.Action
 
 	retryCounter int
 }

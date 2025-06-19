@@ -13,7 +13,7 @@ import (
 	"github.com/chromedp/cdproto/dom"
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/chromedp"
-	"github.com/geziyor/geziyor/internal"
+	"github.com/Cheasezz/gop/internal"
 	"golang.org/x/net/html/charset"
 	"golang.org/x/text/transform"
 )
@@ -42,7 +42,7 @@ type Options struct {
 	// Geziyor Response will be nearly empty. Because we have no way to extract response without default pre actions.
 	// So, if you set this, you should handle all navigation, header setting, and response handling yourself.
 	// See defaultPreActions variable for the existing defaults.
-	PreActions []chromedp.Action
+	PreActionsF func(data *ResponseData) []chromedp.Action
 }
 
 // Default values for client
@@ -167,6 +167,13 @@ func (c *Client) doRequestClient(req *Request) (*Response, error) {
 	return &response, nil
 }
 
+type ResponseData struct {
+	Body       string
+	Res        *network.Response
+	Req        *Request
+	ReqHeaders network.Headers
+}
+
 // doRequestChrome opens up a new chrome instance and makes request
 func (c *Client) doRequestChrome(req *Request) (*Response, error) {
 	// Set remote allocator or use local chrome instance
@@ -184,16 +191,21 @@ func (c *Client) doRequestChrome(req *Request) (*Response, error) {
 	defer taskCancel()
 
 	// Initiate default pre actions
-	var body string
-	var res *network.Response
+	data := &ResponseData{
+		Body:       "",
+		Res:        nil,
+		Req:        req,
+		ReqHeaders: nil,
+	}
+
 	var defaultPreActions = []chromedp.Action{
 		network.Enable(),
-		network.SetExtraHTTPHeaders(ConvertHeaderToMap(req.Header)),
+		network.SetExtraHTTPHeaders(ConvertHeaderToMap(data.Req.Header)),
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			chromedp.ListenTarget(ctx, func(ev interface{}) {
 				if event, ok := ev.(*network.EventResponseReceived); ok {
-					if res == nil && event.Type == "Document" {
-						res = event.Response
+					if data.Res == nil && event.Type == "Document" {
+						data.Res = event.Response
 					}
 				}
 			})
@@ -206,18 +218,18 @@ func (c *Client) doRequestChrome(req *Request) (*Response, error) {
 			if err != nil {
 				return err
 			}
-			body, err = dom.GetOuterHTML().WithNodeID(node.NodeID).Do(ctx)
+			data.Body, err = dom.GetOuterHTML().WithNodeID(node.NodeID).Do(ctx)
 			return err
 		}),
 	}
 
 	// If options has pre actions, we override the default existing one.
-	if len(c.opt.PreActions) != 0 {
-		defaultPreActions = c.opt.PreActions
+	if c.opt.PreActionsF != nil {
+		defaultPreActions = c.opt.PreActionsF(data)
 	}
 
 	// Append custom actions to default ones.
-	defaultPreActions = append(defaultPreActions, req.Actions...)
+	defaultPreActions = append(defaultPreActions, req.ActionsF(data)...)
 
 	// Run all actions
 	if err := chromedp.Run(taskCtx, defaultPreActions...); err != nil {
@@ -229,17 +241,17 @@ func (c *Client) doRequestChrome(req *Request) (*Response, error) {
 	}
 
 	// If response is set by default pre actions
-	if res != nil {
-		req.Header = ConvertMapToHeader(res.RequestHeaders)
-		req.URL, _ = url.Parse(res.URL)
-		httpResponse.StatusCode = int(res.Status)
-		httpResponse.Proto = res.Protocol
-		httpResponse.Header = ConvertMapToHeader(res.Headers)
+	if data.Res != nil {
+		req.Header = ConvertMapToHeader(data.ReqHeaders)
+		req.URL, _ = url.Parse(data.Res.URL)
+		httpResponse.StatusCode = int(data.Res.Status)
+		httpResponse.Proto = data.Res.Protocol
+		httpResponse.Header = ConvertMapToHeader(data.Res.Headers)
 	}
 
 	response := Response{
 		Response: httpResponse,
-		Body:     []byte(body),
+		Body:     []byte(data.Body),
 		Request:  req,
 	}
 

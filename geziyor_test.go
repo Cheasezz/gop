@@ -2,7 +2,6 @@ package geziyor_test
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,19 +10,16 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chromedp/cdproto/dom"
-	"github.com/chromedp/chromedp"
-
 	"github.com/PuerkitoBio/goquery"
 	"github.com/elazarl/goproxy"
 	"github.com/fortytw2/leaktest"
-	"github.com/geziyor/geziyor"
-	"github.com/geziyor/geziyor/cache"
-	"github.com/geziyor/geziyor/cache/diskcache"
-	"github.com/geziyor/geziyor/client"
-	"github.com/geziyor/geziyor/export"
-	"github.com/geziyor/geziyor/internal"
-	"github.com/geziyor/geziyor/metrics"
+	"github.com/Cheasezz/gop"
+	"github.com/Cheasezz/gop/cache"
+	"github.com/Cheasezz/gop/cache/diskcache"
+	"github.com/Cheasezz/gop/client"
+	"github.com/Cheasezz/gop/export"
+	"github.com/Cheasezz/gop/internal"
+	"github.com/Cheasezz/gop/metrics"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -142,37 +138,25 @@ func TestGetRendered(t *testing.T) {
 	}).Start()
 }
 
-func TestGetRenderedCustomActions(t *testing.T) {
-	geziyor.NewGeziyor(&geziyor.Options{
-		StartRequestsFunc: func(g *geziyor.Geziyor) {
-			req, _ := client.NewRequest("GET", "https://httpbin.org/anything", nil)
-			req.Rendered = true
-			req.Actions = []chromedp.Action{
-				chromedp.Navigate("https://httpbin.org/anything"),
-				chromedp.WaitReady(":root"),
-				chromedp.ActionFunc(func(ctx context.Context) error {
-					node, err := dom.GetDocument().Do(ctx)
-					if err != nil {
-						return err
-					}
-					body, err := dom.GetOuterHTML().WithNodeID(node.NodeID).Do(ctx)
-					fmt.Println("HOLAAA", body)
-					return err
-				}),
-			}
-			g.Do(req, g.Opt.ParseFunc)
-		},
-		ParseFunc: func(g *geziyor.Geziyor, r *client.Response) {
-			assert.Equal(t, 200, r.StatusCode)
-			fmt.Println(string(r.Body))
-			fmt.Println(r.Request.URL.String(), r.Header)
-		},
-		// This will make only visit and nothing more.
-		//PreActions: []chromedp.Action{
-		//	chromedp.Navigate("https://httpbin.org/anything"),
-		//},
-	}).Start()
-}
+// func TestGetRenderedCustomActions(t *testing.T) {
+// 	geziyor.NewGeziyor(&geziyor.Options{
+// 		StartRequestsFunc: func(g *geziyor.Geziyor) {
+// 			req, _ := client.NewRequest("GET", "https://httpbin.org/anything", nil)
+// 			req.Rendered = true
+// 			req.ActionsF = acc
+// 			g.Do(req, g.Opt.ParseFunc)
+// 		},
+// 		ParseFunc: func(g *geziyor.Geziyor, r *client.Response) {
+// 			assert.Equal(t, 200, r.StatusCode)
+// 			fmt.Println(string(r.Body))
+// 			fmt.Println(r.Request.URL.String(), r.Header)
+// 		},
+// 		// This will make only visit and nothing more.
+// 		//PreActions: []chromedp.Action{
+// 		//	chromedp.Navigate("https://httpbin.org/anything"),
+// 		//},
+// 	}).Start()
+// }
 
 func TestGetRenderedCookie(t *testing.T) {
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

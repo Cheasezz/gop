@@ -2,12 +2,12 @@ package geziyor
 
 import (
 	"github.com/chromedp/chromedp"
-	"github.com/geziyor/geziyor/cache"
-	"github.com/geziyor/geziyor/client"
-	"github.com/geziyor/geziyor/export"
-	"github.com/geziyor/geziyor/internal"
-	"github.com/geziyor/geziyor/metrics"
-	"github.com/geziyor/geziyor/middleware"
+	"github.com/Cheasezz/gop/cache"
+	"github.com/Cheasezz/gop/client"
+	"github.com/Cheasezz/gop/export"
+	"github.com/Cheasezz/gop/internal"
+	"github.com/Cheasezz/gop/metrics"
+	"github.com/Cheasezz/gop/middleware"
 	"golang.org/x/time/rate"
 
 	"io"
@@ -82,7 +82,7 @@ func NewGeziyor(opt *Options) *Geziyor {
 		RemoteAllocatorURL:    opt.BrowserEndpoint,
 		AllocatorOptions:      chromedp.DefaultExecAllocatorOptions[:],
 		ProxyFunc:             opt.ProxyFunc,
-		PreActions:            opt.PreActions,
+		PreActionsF:           opt.PreActionsF,
 	})
 	if opt.Cache != nil {
 		geziyor.Client.Transport = &cache.Transport{

@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"github.com/geziyor/geziyor/client"
-	"github.com/geziyor/geziyor/internal"
+	"github.com/Cheasezz/gop/client"
+	"github.com/Cheasezz/gop/internal"
 	"sync"
 )
 

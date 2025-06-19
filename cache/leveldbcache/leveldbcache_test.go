@@ -1,7 +1,7 @@
 package leveldbcache
 
 import (
-	"github.com/geziyor/geziyor/cache"
+	"github.com/Cheasezz/gop/cache"
 	"io/ioutil"
 	"os"
 	"path/filepath"
