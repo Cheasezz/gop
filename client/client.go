@@ -18,10 +18,8 @@ import (
 	"golang.org/x/text/transform"
 )
 
-var (
-	// ErrNoCookieJar is the error type for missing cookie jar
-	ErrNoCookieJar = errors.New("cookie jar is not available")
-)
+// ErrNoCookieJar is the error type for missing cookie jar
+var ErrNoCookieJar = errors.New("cookie jar is not available")
 
 // Client is a small wrapper around *http.Client to provide new methods.
 type Client struct {
@@ -52,14 +50,12 @@ const (
 	DefaultRetryTimes       = 2
 )
 
-var (
-	DefaultRetryHTTPCodes = []int{500, 502, 503, 504, 522, 524, 408}
-)
+var DefaultRetryHTTPCodes = []int{500, 502, 503, 504, 522, 524, 408}
 
 // NewClient creates http.Client with modified values for typical web scraper
 func NewClient(opt *Options) *Client {
 	// Default proxy function is http.ProxyFunction
-	var proxyFunction = http.ProxyFromEnvironment
+	proxyFunction := http.ProxyFromEnvironment
 	if opt.ProxyFunc != nil {
 		proxyFunction = opt.ProxyFunc
 	}
@@ -193,12 +189,12 @@ func (c *Client) doRequestChrome(req *Request) (*Response, error) {
 	// Initiate default pre actions
 	data := &ResponseData{
 		Body:       "",
-		Res:        nil,
+		Res:        &network.Response{},
 		Req:        req,
-		ReqHeaders: nil,
+		ReqHeaders: network.Headers{},
 	}
 
-	var defaultPreActions = []chromedp.Action{
+	defaultPreActions := []chromedp.Action{
 		network.Enable(),
 		network.SetExtraHTTPHeaders(ConvertHeaderToMap(data.Req.Header)),
 		chromedp.ActionFunc(func(ctx context.Context) error {
@@ -229,7 +225,9 @@ func (c *Client) doRequestChrome(req *Request) (*Response, error) {
 	}
 
 	// Append custom actions to default ones.
-	defaultPreActions = append(defaultPreActions, req.ActionsF(data)...)
+	if req.ActionsF != nil {
+		defaultPreActions = append(defaultPreActions, req.ActionsF(data)...)
+	}
 
 	// Run all actions
 	if err := chromedp.Run(taskCtx, defaultPreActions...); err != nil {
