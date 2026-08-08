@@ -78,7 +78,7 @@ func NewGop(opt *Options) *Gop {
 		RetryTimes:            opt.RetryTimes,
 		RetryHTTPCodes:        opt.RetryHTTPCodes,
 		RemoteAllocatorURL:    opt.BrowserEndpoint,
-		AllocatorOptions:      chromedp.DefaultExecAllocatorOptions[:],
+		AllocatorOptions:      append(chromedp.DefaultExecAllocatorOptions[:], chromedp.Flag("disable-features", "ProfilePicker")),
 		ProxyFunc:             opt.ProxyFunc,
 		PreActionsF:           opt.PreActionsF,
 	})
