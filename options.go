@@ -79,7 +79,7 @@ type Options struct {
 	// Rendered requests pre actions. Setting this will override the existing default.
 	// And you'll need to handle all rendered actions, like navigation, waiting, response etc.
 	// If you need to make custom actions in addition to the defaults, use Request.ActionsF instead of this.
-	PreActionsF func(data *client.ResponseData) []chromedp.Action
+	PreActionsF func() []chromedp.Action
 
 	// Request delays
 	RequestDelay time.Duration
