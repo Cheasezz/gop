@@ -1,6 +1,13 @@
 package gop
 
 import (
+	"io"
+	"net/http/cookiejar"
+	"os"
+	"os/signal"
+	"runtime/debug"
+	"sync"
+
 	"github.com/Cheasezz/gop/cache"
 	"github.com/Cheasezz/gop/client"
 	"github.com/Cheasezz/gop/export"
@@ -9,14 +16,6 @@ import (
 	"github.com/Cheasezz/gop/middleware"
 	"github.com/chromedp/chromedp"
 	"golang.org/x/time/rate"
-
-	"io"
-	"io/ioutil"
-	"net/http/cookiejar"
-	"os"
-	"os/signal"
-	"runtime/debug"
-	"sync"
 )
 
 // Gop is our main scraper type
@@ -42,7 +41,6 @@ type Gop struct {
 // NewGop creates new Gop with default values.
 // If options provided, options
 func NewGop(opt *Options) *Gop {
-
 	// Default Options
 	if opt.UserAgent == "" {
 		opt.UserAgent = client.DefaultUserAgent
@@ -130,7 +128,7 @@ func NewGop(opt *Options) *Gop {
 
 	// Logging
 	if opt.LogDisabled {
-		internal.Logger.SetOutput(ioutil.Discard)
+		internal.Logger.SetOutput(io.Discard)
 	} else {
 		internal.Logger.SetOutput(os.Stdout)
 	}
