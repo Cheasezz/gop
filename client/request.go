@@ -30,7 +30,8 @@ type Request struct {
 	Cancelled bool
 
 	// Chrome actions to be run if the request is Rendered
-	ActionsF func(data *ResponseData) []chromedp.Action
+	// ActionsF func(data *ResponseData) []chromedp.Action
+	ActionsF func() []chromedp.Action
 
 	retryCounter int
 }
