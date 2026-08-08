@@ -22,7 +22,7 @@ import (
 type Gop struct {
 	Opt     *Options
 	Client  *client.Client
-	Exports chan interface{}
+	Exports chan any
 
 	metrics        *metrics.Metrics
 	reqMiddlewares []middleware.RequestProcessor
@@ -57,7 +57,7 @@ func NewGop(opt *Options) *Gop {
 
 	gop := &Gop{
 		Opt:     opt,
-		Exports: make(chan interface{}, 1),
+		Exports: make(chan any, 1),
 		reqMiddlewares: []middleware.RequestProcessor{
 			&middleware.AllowedDomains{AllowedDomains: opt.AllowedDomains},
 			&middleware.DuplicateRequests{RevisitEnabled: opt.URLRevisitEnabled},
@@ -323,11 +323,11 @@ func (g *Gop) interruptSignalWaiter(shutdownChan chan os.Signal, shutdownDoneCha
 
 func (g *Gop) startExporters() {
 	if len(g.Opt.Exporters) != 0 {
-		var exporterChans []chan interface{}
+		var exporterChans []chan any
 
 		g.wgExporters.Add(len(g.Opt.Exporters))
 		for _, exporter := range g.Opt.Exporters {
-			exporterChan := make(chan interface{})
+			exporterChan := make(chan any)
 			exporterChans = append(exporterChans, exporterChan)
 			go func(exporter export.Exporter) {
 				defer g.wgExporters.Done()

@@ -3,10 +3,11 @@ package export
 import (
 	"encoding/csv"
 	"fmt"
-	"github.com/Cheasezz/gop/internal"
 	"os"
 	"reflect"
 	"sort"
+
+	"github.com/Cheasezz/gop/internal"
 )
 
 // CSV exports response data as CSV streaming file
@@ -17,10 +18,9 @@ type CSV struct {
 }
 
 // Export exports response data as CSV streaming file
-func (e *CSV) Export(exports chan interface{}) error {
-
+func (e *CSV) Export(exports chan any) error {
 	// Create or append file
-	file, err := os.OpenFile(internal.DefaultString(e.FileName, "out.csv"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(internal.DefaultString(e.FileName, "out.csv"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
 	if err != nil {
 		return fmt.Errorf("output file creation error: %w", err)
 	}

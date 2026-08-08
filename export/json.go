@@ -17,7 +17,7 @@ type JSONLine struct {
 }
 
 // Export exports response data as JSON streaming file
-func (e *JSONLine) Export(exports chan interface{}) error {
+func (e *JSONLine) Export(exports chan any) error {
 
 	// Create or append file
 	file, err := os.OpenFile(internal.DefaultString(e.FileName, "out.json"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -47,7 +47,7 @@ type JSON struct {
 }
 
 // Export exports response data as JSON
-func (e *JSON) Export(exports chan interface{}) error {
+func (e *JSON) Export(exports chan any) error {
 
 	// Create or append file
 	file, err := os.OpenFile(internal.DefaultString(e.FileName, "out.json"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -83,7 +83,7 @@ func (e *JSON) Export(exports chan interface{}) error {
 }
 
 // jsonMarshalLine adds tab and comma around actual data
-func jsonMarshalLine(t interface{}, escapeHTML bool) ([]byte, error) {
+func jsonMarshalLine(t any, escapeHTML bool) ([]byte, error) {
 	buffer := &bytes.Buffer{}
 	encoder := json.NewEncoder(buffer)
 	encoder.SetEscapeHTML(escapeHTML)

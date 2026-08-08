@@ -201,7 +201,7 @@ func (c *Client) doRequestChrome(req *Request) (*Response, error) {
 		network.Enable(),
 		network.SetExtraHTTPHeaders(ConvertHeaderToMap(req.Header)),
 		chromedp.ActionFunc(func(ctx context.Context) error {
-			chromedp.ListenTarget(ctx, func(ev interface{}) {
+			chromedp.ListenTarget(ctx, func(ev any) {
 				if event, ok := ev.(*network.EventResponseReceived); ok {
 					if res == nil && event.Type == "Document" {
 						res = event.Response
@@ -301,8 +301,8 @@ func SetDefaultHeader(header http.Header, key string, value string) http.Header 
 }
 
 // ConvertHeaderToMap converts http.Header to map[string]interface{}
-func ConvertHeaderToMap(header http.Header) map[string]interface{} {
-	m := make(map[string]interface{})
+func ConvertHeaderToMap(header http.Header) map[string]any {
+	m := make(map[string]any)
 	for key, values := range header {
 		for _, value := range values {
 			m[key] = value
@@ -312,7 +312,7 @@ func ConvertHeaderToMap(header http.Header) map[string]interface{} {
 }
 
 // ConvertMapToHeader converts map[string]interface{} to http.Header
-func ConvertMapToHeader(m map[string]interface{}) http.Header {
+func ConvertMapToHeader(m map[string]any) http.Header {
 	header := http.Header{}
 	for k, v := range m {
 		header.Set(k, v.(string))

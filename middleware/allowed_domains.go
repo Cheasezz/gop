@@ -1,9 +1,10 @@
 package middleware
 
 import (
+	"sync"
+
 	"github.com/Cheasezz/gop/client"
 	"github.com/Cheasezz/gop/internal"
-	"sync"
 )
 
 // AllowedDomains checks for request host if it exists in AllowedDomains
